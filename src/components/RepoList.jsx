@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
+import { Typography, TextField, Grid, List, ListItem, ListItemText } from "@mui/material";
 
 const RepoList = ({ username }) => {
   const [repos, setRepos] = useState([]);
+  const [filteredRepos, setFilteredRepos] = useState([]);
+  const [filterCriteria, setFilterCriteria] = useState({
+    stars: 0,
+    createdAfter: "",
+    language: ""
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -12,8 +19,8 @@ const RepoList = ({ username }) => {
           `https://api.github.com/users/${username}/repos`
         );
         const sortedRepos = response.data.sort((a, b) => b.size - a.size);
-        const topRepos = sortedRepos.slice(0, 5);
-        setRepos(topRepos);
+        setRepos(sortedRepos);
+        setFilteredRepos(sortedRepos); //Mostrar todos los repos sin filtrar
       } catch (error) {
         console.error("Error fetching repos:", error);
       }
@@ -22,16 +29,65 @@ const RepoList = ({ username }) => {
     fetchData();
   }, [username]);
 
+  useEffect(() => {
+    const applyFilters = () => {
+      let filtered = repos.filter(repo => {
+        if (repo.stargazers_count < filterCriteria.stars) {
+          return false;
+        }
+        if (filterCriteria.createdAfter !== "" && new Date(repo.created_at) < new Date(filterCriteria.createdAfter)) {
+          return false;
+        }
+        return true;
+      });
+      setFilteredRepos(filtered);
+    };
+
+    applyFilters();
+  }, [filterCriteria, repos]);
+
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
+    setFilterCriteria(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+
   return (
     <div>
-      <h2>Top 5 repositorios con más participación de {username}</h2>
-      <ul>
-        {repos.map((repo) => (
-          <li key={repo.id}>
-            {repo.name} - Tamaño: {repo.size}
-          </li>
+      <br></br>
+      <Typography variant="h4">Repositorios de {username}</Typography>
+      <br></br>
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <TextField
+            label="Número de estrellas"
+            type="number"
+            name="stars"
+            value={filterCriteria.stars}
+            onChange={handleFilterChange}
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <TextField
+            label="Fecha de creación después de"
+            type="date"
+            name="createdAfter"
+            value={filterCriteria.createdAfter}
+            onChange={handleFilterChange}
+            fullWidth
+          />
+        </Grid>
+      </Grid>
+      <List>
+        {filteredRepos.map((repo) => (
+          <ListItem key={repo.id}>
+            <ListItemText primary={`${repo.name} - Tamaño: ${repo.size}`} />
+          </ListItem>
         ))}
-      </ul>
+      </List>
     </div>
   );
 };
