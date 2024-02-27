@@ -40,3 +40,17 @@
 .read-the-docs {
   color: #888;
 }
+
+
+.repo-list-container {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.5s, max-height 0.5s;
+}
+
+.repo-list-container.show {
+  opacity: 1;
+  max-height: 1000px; /* Ajusta según sea necesario */
+}
+
