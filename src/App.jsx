@@ -8,6 +8,7 @@ import {
   Toolbar,
 } from "@mui/material";
 import RepoList from "./components/RepoList";
+import "./App.css";
 
 function App() {
   const [username, setUsername] = useState("");
@@ -23,7 +24,7 @@ function App() {
   };
 
   return (
-    <div>
+    <div className="app-container">
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -40,12 +41,15 @@ function App() {
             onChange={handleUsernameChange}
             fullWidth
             sx={{ marginBottom: "10px" }}
+            id="username-input" // Añadir id para asociarlo con el label
           />
           <Button type="submit" variant="contained" fullWidth>
             Buscar Repositorios
           </Button>
         </form>
-        {showRepoList && <RepoList username={username} />}
+        <div className={`repo-list-container ${showRepoList ? 'show' : ''}`}>
+          {showRepoList && <RepoList username={username} />}
+        </div>
       </Container>
     </div>
   );
